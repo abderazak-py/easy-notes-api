@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Resources\NoteResource;
 use App\Models\Note;
+use Illuminate\Http\Request;
 
 class NoteController extends Controller
 {
@@ -15,25 +16,27 @@ class NoteController extends Controller
             ->latest()
             ->get();
 
-        return response()->json($notes);
+        return NoteResource::collection($notes);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'     => 'required|string|max:255',
-            'body'      => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string',
             'is_public' => 'boolean',
         ]);
 
         $note = Note::create([
-            'user_id'   => $request->user()->id,
-            'title'     => $data['title'],
-            'body'      => $data['body'] ?? null,
+            'user_id' => $request->user()->id,
+            'title' => $data['title'],
+            'content' => $data['content'] ?? null,
             'is_public' => $data['is_public'] ?? false,
         ]);
 
-        return response()->json($note, 201);
+        $note->loadCount('likes');
+
+        return new NoteResource($note);
     }
 
     public function show(Request $request, Note $note)
@@ -42,7 +45,7 @@ class NoteController extends Controller
 
         $note->loadCount('likes');
 
-        return response()->json($note);
+        return new NoteResource($note);
     }
 
     public function update(Request $request, Note $note)
@@ -50,14 +53,16 @@ class NoteController extends Controller
         $this->authorizeNote($request, $note);
 
         $data = $request->validate([
-            'title'     => 'sometimes|string|max:255',
-            'body'      => 'sometimes|nullable|string',
+            'title' => 'sometimes|string|max:255',
+            'content' => 'sometimes|nullable|string',
             'is_public' => 'sometimes|boolean',
         ]);
 
         $note->update($data);
 
-        return response()->json($note);
+        $note->loadCount('likes');
+
+        return new NoteResource($note);
     }
 
     public function destroy(Request $request, Note $note)
@@ -67,6 +72,27 @@ class NoteController extends Controller
         $note->delete();
 
         return response()->json(['message' => 'Deleted']);
+    }
+
+    public function publicIndex()
+    {
+        $notes = Note::where('is_public', true)
+            ->withCount('likes')
+            ->latest()
+            ->get();
+
+        return NoteResource::collection($notes);
+    }
+
+    public function publicShow(Note $note)
+    {
+        if (! $note->is_public) {
+            return response()->json(['message' => 'Not public'], 403);
+        }
+
+        $note->loadCount('likes');
+
+        return new NoteResource($note);
     }
 
     protected function authorizeNote(Request $request, Note $note)
