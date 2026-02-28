@@ -1,17 +1,11 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\NoteController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-
     Route::get('/notes', [NoteController::class, 'index']);
     Route::get('/notes/my', [NoteController::class, 'myNotes']);
     Route::post('/notes', [NoteController::class, 'store']);
@@ -29,3 +23,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notes/{note}/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 });
+
+require __DIR__.'/auth.php';
