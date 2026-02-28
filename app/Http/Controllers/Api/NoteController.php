@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\NoteRequest;
 use App\Http\Resources\NoteResource;
 use App\Models\Note;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 
 class NoteController extends Controller
 {
@@ -102,4 +102,6 @@ class NoteController extends Controller
 
         return new NoteResource($note);
     }
+
+    // Removed the authorizeNote method since we're now using the policy
 }
