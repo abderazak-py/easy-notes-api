@@ -2,30 +2,35 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Http\Requests\NoteRequest;
 use App\Http\Resources\NoteResource;
 use App\Models\Note;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class NoteController extends Controller
 {
     public function index(Request $request)
     {
-        $notes = Note::where('user_id', $request->user()->id)
+        $query = Note::where('user_id', $request->user()->id)
             ->withCount('likes')
-            ->latest()
-            ->get();
+            ->latest();
+
+        if ($search = $request->query('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $notes = $query->paginate(10);
 
         return NoteResource::collection($notes);
     }
 
-    public function store(Request $request)
+    public function store(NoteRequest $request)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'is_public' => 'boolean',
-        ]);
+        $data = $request->validated();
 
         $note = Note::create([
             'user_id' => $request->user()->id,
@@ -41,24 +46,18 @@ class NoteController extends Controller
 
     public function show(Request $request, Note $note)
     {
-        $this->authorizeNote($request, $note);
+        $this->authorize('view', $note);
 
         $note->loadCount('likes');
 
         return new NoteResource($note);
     }
 
-    public function update(Request $request, Note $note)
+    public function update(NoteRequest $request, Note $note)
     {
-        $this->authorizeNote($request, $note);
+        $this->authorize('update', $note);
 
-        $data = $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'content' => 'sometimes|nullable|string',
-            'is_public' => 'sometimes|boolean',
-        ]);
-
-        $note->update($data);
+        $note->update($request->validated());
 
         $note->loadCount('likes');
 
@@ -67,19 +66,28 @@ class NoteController extends Controller
 
     public function destroy(Request $request, Note $note)
     {
-        $this->authorizeNote($request, $note);
+        $this->authorize('delete', $note);
 
         $note->delete();
 
-        return response()->json(['message' => 'Deleted']);
+        return response()->json(['message' => 'Note deleted successfully'], 200);
     }
 
-    public function publicIndex()
+    public function publicIndex(Request $request)
     {
-        $notes = Note::where('is_public', true)
+        $query = Note::where('is_public', true)
             ->withCount('likes')
-            ->latest()
-            ->get();
+            ->orderByDesc('likes_count')
+            ->orderByDesc('created_at');
+
+        if ($search = $request->query('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $notes = $query->paginate(10);
 
         return NoteResource::collection($notes);
     }
@@ -93,12 +101,5 @@ class NoteController extends Controller
         $note->loadCount('likes');
 
         return new NoteResource($note);
-    }
-
-    protected function authorizeNote(Request $request, Note $note)
-    {
-        if ($note->user_id !== $request->user()->id) {
-            abort(403, 'Forbidden');
-        }
     }
 }
