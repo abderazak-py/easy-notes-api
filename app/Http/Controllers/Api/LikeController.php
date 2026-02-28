@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\NoteResource;
 use App\Models\Like;
 use App\Models\Note;
 use Illuminate\Http\Request;
@@ -36,5 +37,20 @@ class LikeController extends Controller
         return response()->json([
             'message' => 'Unliked',
         ]);
+    }
+
+    public function myLikes(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $notes = Note::whereHas('likes', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+            ->withCount('likes')
+            ->with('user')
+            ->latest()
+            ->paginate(10);
+
+        return NoteResource::collection($notes);
     }
 }

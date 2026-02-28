@@ -28,6 +28,24 @@ class NoteController extends Controller
         return NoteResource::collection($notes);
     }
 
+    public function myNotes(Request $request)
+    {
+        $query = Note::where('user_id', $request->user()->id)
+            ->withCount('likes')
+            ->latest();
+
+        if ($search = $request->query('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $notes = $query->paginate(10);
+
+        return NoteResource::collection($notes);
+    }
+
     public function store(NoteRequest $request)
     {
         $data = $request->validated();
@@ -102,6 +120,4 @@ class NoteController extends Controller
 
         return new NoteResource($note);
     }
-
-    // Removed the authorizeNote method since we're now using the policy
 }
