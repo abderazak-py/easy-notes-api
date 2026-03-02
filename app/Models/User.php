@@ -61,4 +61,40 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function followers()
+    {
+        return $this->hasMany(Follower::class, 'user_id');
+    }
+
+    public function following()
+    {
+        return $this->hasMany(Follower::class, 'follower_id');
+    }
+
+    // Many-to-many relationship helpers
+    public function followedUsers()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
+    }
+
+    public function followersUsers()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'user_id', 'follower_id');
+    }
+
+    public function followersCount()
+    {
+        return $this->followers()->count();
+    }
+
+    public function isFollowing($userId)
+    {
+        return $this->following()->where('user_id', $userId)->exists();
+    }
+
+    public function isFollowedBy($userId)
+    {
+        return $this->followers()->where('follower_id', $userId)->exists();
+    }
 }

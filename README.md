@@ -15,7 +15,7 @@ A modern, feature-rich API for managing personal notes with social capabilities.
 ### 🔧 In Progress / Planned Features
 
 #### Users & Social Features
-- **User Profiles**: Public profile endpoint with username, bio, avatar URL, and stats (notes count, likes, comments)
+- **User Profiles**: Public profile endpoint with username, bio, and stats (notes count, likes, comments)
 - **Following System**: Allow users to follow other users with endpoints for follow/unfollow and listing followers/following
 - **Personal Feed**: Display notes from users you follow
 
@@ -67,7 +67,7 @@ A modern, feature-rich API for managing personal notes with social capabilities.
 ## 🚧 Roadmap
 
 ### Phase 1: Social Features
-- [ ] User profiles with customizable avatars and bios
+- [ ] User profiles with customizable names and bios
 - [ ] Following/unfollowing functionality
 - [ ] Personalized feed of notes from followed users
 

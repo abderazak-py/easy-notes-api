@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\NoteController;
+use App\Http\Controllers\FollowerController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -22,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notes/{note}/comments', [CommentController::class, 'index']);
     Route::post('/notes/{note}/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+
+    Route::apiResource('follow', FollowerController::class)->only(['index', 'store', 'destroy']);
 });
 
 require __DIR__.'/auth.php';
