@@ -79,7 +79,6 @@ A modern, feature-rich API for managing personal notes with social capabilities.
 ### Phase 3: Engagement
 - [ ] Real-time notifications
 - [ ] Rich text formatting for notes
-- [ ] Media attachments for notes
 
 ## 🛡️ Security
 

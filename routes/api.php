@@ -3,10 +3,16 @@
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\NoteController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\FollowerController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
+    // Profile routes
+    Route::post('/profile/setup', [ProfileController::class, 'setup']);
+    Route::put('/profile', [ProfileController::class, 'updateNameBio']);
+    Route::get('/profile', [ProfileController::class, 'show']);
+
     Route::get('/notes', [NoteController::class, 'index']);
     Route::get('/notes/my', [NoteController::class, 'myNotes']);
     Route::get('/notes/liked', [LikeController::class, 'myLikes']);
