@@ -29,6 +29,9 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'username' => fake()->unique()->userName(),
+            'bio' => fake()->optional()->sentence(),
+            'gender' => fake()->optional()->randomElement(['male', 'female']),
         ];
     }
 
@@ -39,6 +42,18 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user has not set up their profile.
+     */
+    public function withoutProfile(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'username' => null,
+            'bio' => null,
+            'gender' => null,
         ]);
     }
 }

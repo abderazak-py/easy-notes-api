@@ -138,3 +138,19 @@ it('cannot delete another user\'s comment on another user\'s note', function () 
 
     $response->assertForbidden();
 });
+
+it('cannot create a comment without profile setup', function () {
+    $user = User::factory()->withoutProfile()->create();
+    Sanctum::actingAs($user);
+
+    $note = Note::factory()->create(['is_public' => true]);
+
+    $response = $this->postJson("/api/notes/{$note->id}/comments", [
+        'body' => 'This is a test comment',
+    ]);
+
+    $response->assertForbidden()
+        ->assertJson([
+            'message' => 'Please set up your profile first.',
+        ]);
+});

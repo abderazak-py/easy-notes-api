@@ -193,3 +193,18 @@ it('requires authentication for notes endpoints', function () {
 
     $response->assertUnauthorized();
 });
+
+it('cannot create a note without profile setup', function () {
+    $user = User::factory()->withoutProfile()->create();
+    Sanctum::actingAs($user);
+
+    $response = $this->postJson('/api/notes', [
+        'title' => 'Test Note',
+        'content' => 'This is the content',
+    ]);
+
+    $response->assertForbidden()
+        ->assertJson([
+            'message' => 'Please set up your profile first.',
+        ]);
+});

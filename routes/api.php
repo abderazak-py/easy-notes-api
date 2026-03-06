@@ -16,7 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notes', [NoteController::class, 'index']);
     Route::get('/notes/my', [NoteController::class, 'myNotes']);
     Route::get('/notes/liked', [LikeController::class, 'myLikes']);
-    Route::post('/notes', [NoteController::class, 'store']);
+    Route::post('/notes', [NoteController::class, 'store'])->middleware('profile.setup');
     Route::get('/notes/{note}', [NoteController::class, 'show']);
     Route::put('/notes/{note}', [NoteController::class, 'update']);
     Route::delete('/notes/{note}', [NoteController::class, 'destroy']);
@@ -26,7 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/notes/{note}/like', [LikeController::class, 'unlike']);
 
     Route::get('/notes/{note}/comments', [CommentController::class, 'index']);
-    Route::post('/notes/{note}/comments', [CommentController::class, 'store']);
+    Route::post('/notes/{note}/comments', [CommentController::class, 'store'])->middleware('profile.setup');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
     Route::apiResource('follow', FollowerController::class)->only(['index', 'store', 'destroy']);
