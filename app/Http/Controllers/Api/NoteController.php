@@ -120,4 +120,31 @@ class NoteController extends Controller
 
         return new NoteResource($note);
     }
+
+    /**
+     * Get a personal feed of notes from users the authenticated user follows.
+     */
+    public function feed(Request $request)
+    {
+        $user = $request->user();
+
+        // Get IDs of users that the authenticated user follows
+        $followingIds = $user->followedUsers()->pluck('users.id');
+
+        $query = Note::whereIn('user_id', $followingIds)
+            ->where('is_public', true)
+            ->withCount('likes')
+            ->latest();
+
+        if ($search = $request->query('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $notes = $query->paginate(10);
+
+        return NoteResource::collection($notes);
+    }
 }

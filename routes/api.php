@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notes', [NoteController::class, 'index']);
     Route::get('/notes/my', [NoteController::class, 'myNotes']);
     Route::get('/notes/liked', [LikeController::class, 'myLikes']);
+    Route::get('/notes/feed', [NoteController::class, 'feed']);
     Route::post('/notes', [NoteController::class, 'store'])->middleware('profile.setup');
     Route::get('/notes/{note}', [NoteController::class, 'show']);
     Route::put('/notes/{note}', [NoteController::class, 'update']);

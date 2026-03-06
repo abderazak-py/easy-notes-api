@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Follower;
 use App\Models\Note;
 use App\Models\User;
 use Laravel\Sanctum\Sanctum;
@@ -207,4 +208,95 @@ it('cannot create a note without profile setup', function () {
         ->assertJson([
             'message' => 'Please set up your profile first.',
         ]);
+});
+
+// Personal Feed Tests
+it('can get personal feed of notes from followed users', function () {
+    Sanctum::actingAs($this->user);
+
+    // Create users to follow
+    $followedUser1 = User::factory()->create();
+    $followedUser2 = User::factory()->create();
+    $notFollowedUser = User::factory()->create();
+
+    // Follow users
+    Follower::factory()->create([
+        'follower_id' => $this->user->id,
+        'user_id' => $followedUser1->id,
+    ]);
+    Follower::factory()->create([
+        'follower_id' => $this->user->id,
+        'user_id' => $followedUser2->id,
+    ]);
+
+    // Create public notes from followed users
+    Note::factory()->create(['user_id' => $followedUser1->id, 'is_public' => true]);
+    Note::factory()->create(['user_id' => $followedUser2->id, 'is_public' => true]);
+
+    // Create public note from not followed user (should not appear in feed)
+    Note::factory()->create(['user_id' => $notFollowedUser->id, 'is_public' => true]);
+
+    $response = $this->getJson('/api/notes/feed');
+
+    $response->assertSuccessful()
+        ->assertJsonCount(2, 'data');
+});
+
+it('personal feed only shows public notes from followed users', function () {
+    Sanctum::actingAs($this->user);
+
+    $followedUser = User::factory()->create();
+
+    Follower::factory()->create([
+        'follower_id' => $this->user->id,
+        'user_id' => $followedUser->id,
+    ]);
+
+    // Create public note
+    Note::factory()->create(['user_id' => $followedUser->id, 'is_public' => true]);
+
+    // Create private note (should not appear in feed)
+    Note::factory()->create(['user_id' => $followedUser->id, 'is_public' => false]);
+
+    $response = $this->getJson('/api/notes/feed');
+
+    $response->assertSuccessful()
+        ->assertJsonCount(1, 'data');
+});
+
+it('personal feed returns empty when not following anyone', function () {
+    Sanctum::actingAs($this->user);
+
+    // Create public notes from other users
+    Note::factory()->count(3)->create(['is_public' => true]);
+
+    $response = $this->getJson('/api/notes/feed');
+
+    $response->assertSuccessful()
+        ->assertJsonCount(0, 'data');
+});
+
+it('can search in personal feed', function () {
+    Sanctum::actingAs($this->user);
+
+    $followedUser = User::factory()->create();
+
+    Follower::factory()->create([
+        'follower_id' => $this->user->id,
+        'user_id' => $followedUser->id,
+    ]);
+
+    Note::factory()->create(['user_id' => $followedUser->id, 'is_public' => true, 'title' => 'Laravel Tips']);
+    Note::factory()->create(['user_id' => $followedUser->id, 'is_public' => true, 'title' => 'Vue Guide']);
+
+    $response = $this->getJson('/api/notes/feed?q=Laravel');
+
+    $response->assertSuccessful()
+        ->assertJsonCount(1, 'data');
+});
+
+it('personal feed requires authentication', function () {
+    $response = $this->getJson('/api/notes/feed');
+
+    $response->assertUnauthorized();
 });
