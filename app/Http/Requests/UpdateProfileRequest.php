@@ -26,4 +26,20 @@ class UpdateProfileRequest extends FormRequest
             'bio' => ['nullable', 'string', 'max:200'],
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'The name field is required.',
+            'name.string' => 'The name must be a valid string.',
+            'name.max' => 'The name may not be greater than 20 characters.',
+            'bio.string' => 'The bio must be a valid string.',
+            'bio.max' => 'The bio may not be greater than 200 characters.',
+        ];
+    }
 }

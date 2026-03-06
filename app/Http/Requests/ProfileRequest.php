@@ -29,4 +29,28 @@ class ProfileRequest extends FormRequest
             'gender' => ['required', 'in:male,female'],
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'The name field is required.',
+            'name.string' => 'The name must be a valid string.',
+            'name.max' => 'The name may not be greater than 20 characters.',
+            'username.required' => 'The username field is required.',
+            'username.string' => 'The username must be a valid string.',
+            'username.min' => 'The username must be at least 3 characters.',
+            'username.max' => 'The username may not be greater than 20 characters.',
+            'username.regex' => 'The username may only contain letters, numbers, and underscores.',
+            'username.unique' => 'This username has already been taken.',
+            'bio.string' => 'The bio must be a valid string.',
+            'bio.max' => 'The bio may not be greater than 200 characters.',
+            'gender.required' => 'The gender field is required.',
+            'gender.in' => 'The selected gender is invalid. Please choose male or female.',
+        ];
+    }
 }

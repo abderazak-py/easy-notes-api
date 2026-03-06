@@ -24,9 +24,11 @@ class NoteRequest extends FormRequest
         $required = $this->isMethod('post') ? 'required' : 'sometimes';
 
         return [
-            'title' => "{$required}|string|max:500",
+            'title' => "{$required}|string|max:50",
             'content' => 'sometimes|nullable|string',
             'is_public' => 'sometimes|boolean',
+            'tags' => 'sometimes|array',
+            'tags.*' => 'string|max:50',
         ];
     }
 
@@ -35,7 +37,7 @@ class NoteRequest extends FormRequest
         return [
             'title.required' => 'The title field is required.',
             'title.string' => 'The title field must be a string.',
-            'title.max' => 'The title field must not be greater than 500 characters.',
+            'title.max' => 'The title field must not be greater than 50 characters.',
             'content.string' => 'The content field must be a string.',
             'is_public.boolean' => 'The is_public field must be true or false.',
         ];

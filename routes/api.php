@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\FollowerController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notes/{note}/comments', [CommentController::class, 'index']);
     Route::post('/notes/{note}/comments', [CommentController::class, 'store'])->middleware('profile.setup');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+
+    // Tag routes
+    Route::get('/tags', [TagController::class, 'index']);
+    Route::get('/tags/popular', [TagController::class, 'popular']);
+    Route::get('/tags/{tag}', [TagController::class, 'show']);
+    Route::post('/tags', [TagController::class, 'store']);
+    Route::put('/tags/{tag}', [TagController::class, 'update']);
+    Route::delete('/tags/{tag}', [TagController::class, 'destroy']);
 
     Route::apiResource('follow', FollowerController::class)->only(['index', 'store', 'destroy']);
 });

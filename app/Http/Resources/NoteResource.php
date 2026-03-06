@@ -21,6 +21,11 @@ class NoteResource extends JsonResource
             'likes_count' => $this->likes_count ?? $this->likes()->count(),
             'liked_by_me' => $this->when(auth()->check(), fn () => $this->likes()->where('user_id', auth()->id())->exists()
             ),
+            'tags' => $this->when($this->relationLoaded('tags'), fn () => $this->tags->map(fn ($tag) => [
+                'id' => $tag->id,
+                'name' => $tag->name,
+                'slug' => $tag->slug,
+            ])),
             'created_at' => $this->created_at,
         ];
     }

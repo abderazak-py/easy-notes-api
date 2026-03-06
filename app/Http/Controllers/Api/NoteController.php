@@ -14,12 +14,19 @@ class NoteController extends Controller
     {
         $query = Note::where('user_id', $request->user()->id)
             ->withCount('likes')
+            ->with('tags')
             ->latest();
 
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        if ($tagSlug = $request->query('tag')) {
+            $query->whereHas('tags', function ($q) use ($tagSlug) {
+                $q->where('slug', $tagSlug);
             });
         }
 
@@ -32,12 +39,19 @@ class NoteController extends Controller
     {
         $query = Note::where('user_id', $request->user()->id)
             ->withCount('likes')
+            ->with('tags')
             ->latest();
 
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        if ($tagSlug = $request->query('tag')) {
+            $query->whereHas('tags', function ($q) use ($tagSlug) {
+                $q->where('slug', $tagSlug);
             });
         }
 
@@ -57,7 +71,12 @@ class NoteController extends Controller
             'is_public' => $data['is_public'] ?? false,
         ]);
 
+        if (isset($data['tags'])) {
+            $this->syncTags($note, $data['tags']);
+        }
+
         $note->loadCount('likes');
+        $note->load('tags');
 
         return new NoteResource($note);
     }
@@ -67,6 +86,7 @@ class NoteController extends Controller
         $this->authorize('view', $note);
 
         $note->loadCount('likes');
+        $note->load('tags');
 
         return new NoteResource($note);
     }
@@ -75,9 +95,15 @@ class NoteController extends Controller
     {
         $this->authorize('update', $note);
 
-        $note->update($request->validated());
+        $data = $request->validated();
+        $note->update($data);
+
+        if (isset($data['tags'])) {
+            $this->syncTags($note, $data['tags']);
+        }
 
         $note->loadCount('likes');
+        $note->load('tags');
 
         return new NoteResource($note);
     }
@@ -95,6 +121,7 @@ class NoteController extends Controller
     {
         $query = Note::where('is_public', true)
             ->withCount('likes')
+            ->with('tags')
             ->orderByDesc('likes_count')
             ->orderByDesc('created_at');
 
@@ -102,6 +129,12 @@ class NoteController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        if ($tagSlug = $request->query('tag')) {
+            $query->whereHas('tags', function ($q) use ($tagSlug) {
+                $q->where('slug', $tagSlug);
             });
         }
 
@@ -117,6 +150,7 @@ class NoteController extends Controller
         }
 
         $note->loadCount('likes');
+        $note->load('tags');
 
         return new NoteResource($note);
     }
@@ -134,6 +168,7 @@ class NoteController extends Controller
         $query = Note::whereIn('user_id', $followingIds)
             ->where('is_public', true)
             ->withCount('likes')
+            ->with('tags')
             ->latest();
 
         if ($search = $request->query('q')) {
@@ -143,8 +178,32 @@ class NoteController extends Controller
             });
         }
 
+        if ($tagSlug = $request->query('tag')) {
+            $query->whereHas('tags', function ($q) use ($tagSlug) {
+                $q->where('slug', $tagSlug);
+            });
+        }
+
         $notes = $query->paginate(10);
 
         return NoteResource::collection($notes);
+    }
+
+    /**
+     * Sync tags for a note.
+     */
+    protected function syncTags(Note $note, array $tags): void
+    {
+        $tagIds = [];
+
+        foreach ($tags as $tagName) {
+            $tag = \App\Models\Tag::firstOrCreate(
+                ['slug' => \Illuminate\Support\Str::slug($tagName)],
+                ['name' => $tagName]
+            );
+            $tagIds[] = $tag->id;
+        }
+
+        $note->tags()->sync($tagIds);
     }
 }
