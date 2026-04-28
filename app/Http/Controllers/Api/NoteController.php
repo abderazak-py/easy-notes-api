@@ -14,7 +14,7 @@ class NoteController extends Controller
     {
         $query = Note::where('user_id', $request->user()->id)
             ->withCount('likes')
-            ->with('tags')
+            ->with(['tags', 'user'])
             ->latest();
 
         if ($search = $request->query('q')) {
@@ -35,30 +35,6 @@ class NoteController extends Controller
         return NoteResource::collection($notes);
     }
 
-    public function myNotes(Request $request)
-    {
-        $query = Note::where('user_id', $request->user()->id)
-            ->withCount('likes')
-            ->with('tags')
-            ->latest();
-
-        if ($search = $request->query('q')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('content', 'like', "%{$search}%");
-            });
-        }
-
-        if ($tagSlug = $request->query('tag')) {
-            $query->whereHas('tags', function ($q) use ($tagSlug) {
-                $q->where('slug', $tagSlug);
-            });
-        }
-
-        $notes = $query->paginate(10);
-
-        return NoteResource::collection($notes);
-    }
 
     public function store(NoteRequest $request)
     {
@@ -76,7 +52,7 @@ class NoteController extends Controller
         }
 
         $note->loadCount('likes');
-        $note->load('tags');
+        $note->load(['tags', 'user']);
 
         return new NoteResource($note);
     }
@@ -86,7 +62,7 @@ class NoteController extends Controller
         $this->authorize('view', $note);
 
         $note->loadCount('likes');
-        $note->load('tags');
+        $note->load(['tags', 'user']);
 
         return new NoteResource($note);
     }
@@ -103,7 +79,7 @@ class NoteController extends Controller
         }
 
         $note->loadCount('likes');
-        $note->load('tags');
+        $note->load(['tags', 'user']);
 
         return new NoteResource($note);
     }
@@ -121,7 +97,7 @@ class NoteController extends Controller
     {
         $query = Note::where('is_public', true)
             ->withCount('likes')
-            ->with('tags')
+            ->with(['tags', 'user'])
             ->orderByDesc('likes_count')
             ->orderByDesc('created_at');
 
@@ -150,7 +126,7 @@ class NoteController extends Controller
         }
 
         $note->loadCount('likes');
-        $note->load('tags');
+        $note->load(['tags', 'user']);
 
         return new NoteResource($note);
     }
@@ -168,7 +144,7 @@ class NoteController extends Controller
         $query = Note::whereIn('user_id', $followingIds)
             ->where('is_public', true)
             ->withCount('likes')
-            ->with('tags')
+            ->with(['tags', 'user'])
             ->latest();
 
         if ($search = $request->query('q')) {

@@ -83,7 +83,6 @@ A modern, feature-rich API for managing personal notes with social capabilities.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/notes` | List own notes (supports `?q=search&tag=slug`) |
-| GET | `/api/notes/my` | List own notes (alternative endpoint) |
 | GET | `/api/notes/feed` | Get feed from followed users |
 | GET | `/api/notes/liked` | Get liked notes |
 | POST | `/api/notes` | Create a new note |
