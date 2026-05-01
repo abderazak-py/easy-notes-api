@@ -51,6 +51,7 @@ class UserFactory extends Factory
     public function withoutProfile(): static
     {
         return $this->state(fn (array $attributes) => [
+            'name' => null,
             'username' => null,
             'bio' => null,
             'gender' => null,

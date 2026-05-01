@@ -42,49 +42,6 @@ it('can get popular tags', function () {
     $response->assertJsonPath('data.0.name', 'Popular');
 });
 
-it('can create a tag', function () {
-    Sanctum::actingAs($this->user);
-
-    $response = $this->postJson('/api/tags', [
-        'name' => 'Laravel',
-    ]);
-
-    $response->assertCreated()
-        ->assertJson([
-            'data' => [
-                'name' => 'Laravel',
-                'slug' => 'laravel',
-            ],
-        ]);
-
-    $this->assertDatabaseHas('tags', [
-        'name' => 'Laravel',
-        'slug' => 'laravel',
-    ]);
-});
-
-it('validates tag creation', function () {
-    Sanctum::actingAs($this->user);
-
-    $response = $this->postJson('/api/tags', []);
-
-    $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['name']);
-});
-
-it('cannot create duplicate tag name', function () {
-    Sanctum::actingAs($this->user);
-
-    Tag::factory()->create(['name' => 'Laravel']);
-
-    $response = $this->postJson('/api/tags', [
-        'name' => 'Laravel',
-    ]);
-
-    $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['name']);
-});
-
 it('can view a tag', function () {
     Sanctum::actingAs($this->user);
 
@@ -99,43 +56,6 @@ it('can view a tag', function () {
                 'name' => $tag->name,
             ],
         ]);
-});
-
-it('can update a tag', function () {
-    Sanctum::actingAs($this->user);
-
-    $tag = Tag::factory()->create(['name' => 'Old Name']);
-
-    $response = $this->putJson("/api/tags/{$tag->id}", [
-        'name' => 'New Name',
-    ]);
-
-    $response->assertSuccessful()
-        ->assertJson([
-            'data' => [
-                'name' => 'New Name',
-                'slug' => 'new-name',
-            ],
-        ]);
-
-    $this->assertDatabaseHas('tags', [
-        'id' => $tag->id,
-        'name' => 'New Name',
-        'slug' => 'new-name',
-    ]);
-});
-
-it('can delete a tag', function () {
-    Sanctum::actingAs($this->user);
-
-    $tag = Tag::factory()->create();
-
-    $response = $this->deleteJson("/api/tags/{$tag->id}");
-
-    $response->assertSuccessful()
-        ->assertJson(['message' => 'Tag deleted successfully']);
-
-    $this->assertDatabaseMissing('tags', ['id' => $tag->id]);
 });
 
 it('requires authentication for tag endpoints', function () {

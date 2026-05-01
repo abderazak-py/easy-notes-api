@@ -9,7 +9,6 @@ beforeEach(function () {
 
 it('can register a new user', function () {
     $response = $this->postJson('/api/register', [
-        'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'password123',
         'password_confirmation' => 'password123',
@@ -26,7 +25,6 @@ it('cannot register with existing email', function () {
     User::factory()->create(['email' => 'test@example.com']);
 
     $response = $this->postJson('/api/register', [
-        'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'password123',
     ]);
@@ -38,7 +36,7 @@ it('validates registration fields', function () {
     $response = $this->postJson('/api/register', []);
 
     $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['name', 'email', 'password']);
+        ->assertJsonValidationErrors(['email', 'password']);
 });
 
 it('can login with correct credentials', function () {

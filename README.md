@@ -26,9 +26,7 @@ A modern, feature-rich API for managing personal notes with social capabilities.
 - **Public Notes**: Browse all public notes sorted by popularity
 
 #### Tagging System
-- **Tag Management**: Create, update, and delete tags
-- **Tag Notes**: Add multiple tags to notes during creation or update
-- **Filter by Tag**: Filter notes by tag slug
+- **Tag Filtering**: Filter notes by tag slug
 - **Popular Tags**: Discover most-used tags ordered by note count
 - **Auto Tag Creation**: Tags are automatically created when adding new tag names to notes
 - **Tag Reuse**: Existing tags are matched by slug to prevent duplicates
@@ -102,9 +100,6 @@ A modern, feature-rich API for managing personal notes with social capabilities.
 | GET | `/api/tags` | List all tags with note counts |
 | GET | `/api/tags/popular` | Get popular tags (top 20 by note count) |
 | GET | `/api/tags/{tag}` | View a specific tag |
-| POST | `/api/tags` | Create a new tag |
-| PUT | `/api/tags/{tag}` | Update a tag |
-| DELETE | `/api/tags/{tag}` | Delete a tag |
 
 ### Comments
 | Method | Endpoint | Description |

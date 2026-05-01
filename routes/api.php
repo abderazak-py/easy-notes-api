@@ -34,9 +34,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tags', [TagController::class, 'index']);
     Route::get('/tags/popular', [TagController::class, 'popular']);
     Route::get('/tags/{tag}', [TagController::class, 'show']);
-    Route::post('/tags', [TagController::class, 'store']);
-    Route::put('/tags/{tag}', [TagController::class, 'update']);
-    Route::delete('/tags/{tag}', [TagController::class, 'destroy']);
 
     Route::apiResource('follow', FollowerController::class)->only(['index', 'store', 'destroy']);
 });
